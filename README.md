@@ -228,7 +228,7 @@ ping 192.168.200.3
 
 **LIVRABLE : capture d'écran de votre tentative de ping.**
 
-![Tentative_dePing](.\Images\Tentative_dePing.PNG)
+![Tentative_dePing](./Images/Tentative_dePing.PNG)
 
 ---
 
