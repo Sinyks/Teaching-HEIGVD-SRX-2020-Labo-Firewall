@@ -113,7 +113,6 @@ Pour établir la table de filtrage, voici les **conditions à respecter** dans l
   <li>En suivant la méthodologie vue en classe, établir la table de filtrage avec précision en spécifiant la source et la destination, le type de trafic (TCP/UDP/ICMP/any), les ports sources et destinations ainsi que l'action désirée (**Accept** ou **Drop**, éventuellement **Reject**).
   </li>                                  
 </ol>
-
 _Pour l'autorisation d'accès (**Accept**), il s'agit d'être le plus précis possible lors de la définition de la source et la destination : si l'accès ne concerne qu'une seule machine (ou un groupe), il faut préciser son adresse IP ou son nom (si vous ne pouvez pas encore la déterminer), et non la zone. 
 Appliquer le principe inverse (être le plus large possible) lorsqu'il faut refuser (**Drop**) une connexion._
 
@@ -122,6 +121,7 @@ _Lors de la définition d'une zone, spécifier l'adresse du sous-réseau IP avec
 ---
 
 **LIVRABLE : Remplir le tableau**
+
 
 | Adresse IP source | Adresse IP destination | Type |   Port src    |   Port dst    | Action |
 | :---------------: | :--------------------: | :--: | :-----------: | :-----------: | :----: |
@@ -133,6 +133,7 @@ _Lors de la définition d'une zone, spécifier l'adresse du sous-réseau IP avec
 | 192.168.100.0/24  |          WAN           | HTTP | TCP : 80/8080 | TCP : 80/8080 | Accept |
 |                   |                        |      |               |               |        |
 |                   |                        |      |               |               |        |
+
 
 ---
 
@@ -159,7 +160,7 @@ Vous avez probablement déjà installé Git pour d’autres cours ou projets. Si
 
 ## Ajout des conteneurs et configuration du réseau
 
-### Le repertoire [scripts](https://github.com/arubinst/Teaching-HEIGVD-SRX-2020-Labo-Firewall/tree/master/scripts) contient des scripts qui automatisent des parties de ce travail. Il es cependant conseillé de la faire manuellement pour mieux comprendre la procédure.
+### Le répertoire [scripts](https://github.com/arubinst/Teaching-HEIGVD-SRX-2020-Labo-Firewall/tree/master/scripts) contient des scripts qui automatisent des parties de ce travail. Il es cependant conseillé de la faire manuellement pour mieux comprendre la procédure.
 
 Nous allons commencer par créer les réseaux **LAN** et **DMZ** dans le système réseau de Docker. Il suffit de tapper les commandes suivantes :
 
@@ -175,7 +176,7 @@ Les images utilisées pour les conteneurs sont basées sur l'image officielle Ub
 ```bash
 docker build -t labofirewall .
 ```
-A partir de l'image, nous pouvons maintenant créer et executer les conteneurs. On va commencer avec le firewall :
+A partir de l'image, nous pouvons maintenant créer et exécuter les conteneurs. On va commencer avec le firewall :
 
 ```bash
 docker run -itd --cap-add=NET_ADMIN --cap-add=NET_RAW --name firewall --hostname Firewall labofirewall /bin/bash
@@ -229,7 +230,7 @@ ping 192.168.200.3
 
 **LIVRABLE : capture d'écran de votre tentative de ping.**
 
-![Tentative_dePing](.\Images\Tentative_dePing.PNG)
+![Tentative_dePing](./Images/Tentative_dePing.PNG)
 
 ---
 
@@ -288,6 +289,8 @@ ping 192.168.100.3
 
 ---
 
+![](./Images/Tentative_dePing_Success.PNG)
+
 La communication est maintenant possible entre les deux machines. Pourtant, si vous essayez de communiquer depuis le client ou le serveur vers l'Internet, ça ne devrait pas encore fonctionner sans une manipulation supplémentaire au niveau du firewall. Vous pouvez le vérifier avec un ping depuis le client ou le serveur vers une adresse Internet. 
 
 Par exemple :
@@ -301,6 +304,8 @@ ping 8.8.8.8
 **LIVRABLE : capture d'écran de votre ping vers l'Internet.**
 
 ---
+
+![](./Images/Tentative_dePing_Internet_Failure.PNG)
 
 ### Configuration réseau du firewall
 
