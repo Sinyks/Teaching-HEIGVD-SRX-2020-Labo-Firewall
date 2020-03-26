@@ -123,17 +123,20 @@ _Lors de la définition d'une zone, spécifier l'adresse du sous-réseau IP avec
 **LIVRABLE : Remplir le tableau**
 
 
-| Adresse IP source | Adresse IP destination | Type |   Port src    |   Port dst    | Action |
-| :---------------: | :--------------------: | :--: | :-----------: | :-----------: | :----: |
-|      0.0.0.0      |        0.0.0.0         |  -   |       -       |       -       |  Drop  |
-| 192.168.100.0/24  |          WAN           | DNS  |  TCP/UDP: 53  |  TCP/UDP: 53  | Accept |
-| 192.168.100.0/24  |          WAN           | ICMP |       7       |       7       | Accept |
-| 192.168.100.0/24  |    192.168.200.0/24    | ICMP |       7       |       7       | Accept |
-| 192.168.200.0/24  |    192.168.100.0/24    | ICMP |       7       |       7       | Accept |
-| 192.168.100.0/24  |          WAN           | HTTP | TCP : 80/8080 | TCP : 80/8080 | Accept |
-|                   |                        |      |               |               |        |
-|                   |                        |      |               |               |        |
-
+| Adresse IP source | Adresse IP destination |   Type   |  Port src   |   Port dst    |   Action   |
+| :---------------: | :--------------------: | :------: | :---------: | :-----------: | :--------: |
+| 192.168.100.0/24  |          WAN           |   DNS    | TCP/UDP: 53 |  TCP/UDP: 53  |   Accept   |
+| 192.168.100.0/24  |          WAN           |   ICMP   |      -      |       -       |   Accept   |
+|     __? WAN__     |  __192.168.100.0/24__  | __ICMP__ |      -      |       -       | __Accept__ |
+| 192.168.100.0/24  |    192.168.200.0/24    |   ICMP   |      -      |       -       |   Accept   |
+| 192.168.200.0/24  |    192.168.100.0/24    |   ICMP   |      -      |       -       |   Accept   |
+| 192.168.100.0/24  |          WAN           |   HTTP   |     any     | TCP : 80/8080 |   Accept   |
+| 192.168.100.0/24  |          WAN           |  HTTPS   |     any     |   TCP : 443   |   Accept   |
+|        WAN        |    192.168.200.3/24    |   HTTP   |     any     |    TCP:80     |   Accept   |
+| 192.168.100.0/24  |    192.168.200.3/24    |   HTTP   |     any     |   TCP : 80    |   Accept   |
+| 192.168.100.3/24  |    192.168.200.3/24    |   SSH    |     any     |   TCP : 22    |   Accept   |
+| 192.168.100.3/24  |    192.168.100.2/24    |   SSH    |     any     |   TCP : 22    |   Accept   |
+|      0.0.0.0      |        0.0.0.0         |   any    |     any     |      any      |    Drop    |
 
 ---
 
