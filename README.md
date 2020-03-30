@@ -667,4 +667,4 @@ A présent, vous devriez avoir le matériel nécessaire afin de reproduire la ta
 ---
 
 
-![](/home/splinux/Documents/git/SRX/Teaching-HEIGVD-SRX-2020-Labo-Firewall/Images/Liste_Rules.png)
+![](./Images/Liste_Rules.png)
