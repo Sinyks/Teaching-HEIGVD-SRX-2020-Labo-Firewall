@@ -434,7 +434,6 @@ ping 8.8.8.8
 Faire une capture du ping.
 
 ---
-**LIVRABLE : capture d'écran de votre ping vers l'Internet.**
 
 ![](./Images/Tentative_dePing_iptables.PNG)
 
@@ -481,8 +480,6 @@ ping www.google.com
 
 ---
 
-**LIVRABLE : capture d'écran de votre ping.**
-
 ![](./Images/Tentative_dePing_DNS.PNG)
 
 ---
@@ -517,7 +514,6 @@ iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 53 -m conntrack --ctstate
 </ol>
 ---
 
-**LIVRABLE : capture d'écran de votre ping.**
 
 ![](./Images/Tentative_dePing_DNS_success.PNG)
 
@@ -530,7 +526,7 @@ iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 53 -m conntrack --ctstate
 ---
 **Réponse**
 
-les paquets étant DROP au niveau du FW le client n'a pas d'erreur de résolution d'adresses
+**les paquets étant DROP au niveau du FW le client n'a pas d'erreur de résolution d'adresses car il ne reçoit aucune réponse**
 
 ---
 
@@ -592,8 +588,6 @@ iptables -A FORWARD -d 192.168.100.3 -p tcp --sport 80 -m conntrack --ctstate IN
 </ol>
 ---
 
-**LIVRABLE : capture d'écran.**
-
 ![](./Images/Tentative_deWGETDMZ_success.PNG)
 
 ---
@@ -612,6 +606,18 @@ Commandes iptables :
 
 ```bash
 LIVRABLE : Commandes iptables
+
+# Autoriser les packets SSH pour la clientLan->DMZ et clientLan->firewall
+
+iptables -A FORWARD -s 192.168.100.3 -d 192.168.200.3 -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -s 192.168.200.3 -d 192.168.100.3 -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+iptables -A INPUT -s 192.168.100.3 -d 192.168.100.2 -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -s 192.168.100.2 -d 192.168.100.3 -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+iptables -A FORWARD -d 192.168.100.3 -p tcp --sport 22 -m conntrack --ctstate INVALID -j DROP
+iptables -A INPUT -d 192.168.100.2 -p tcp --sport 22 -m conntrack --ctstate INVALID -j DROP
+
 ```
 
 ---
@@ -624,7 +630,7 @@ ssh root@192.168.200.3 (password : celui que vous avez configuré)
 
 ---
 
-**LIVRABLE : capture d'écran de votre connexion ssh.**
+![](./Images/Tentative_deSSHDMZ_success.PNG)
 
 ---
 
@@ -635,7 +641,7 @@ ssh root@192.168.200.3 (password : celui que vous avez configuré)
 ---
 **Réponse**
 
-**LIVRABLE : Votre réponse ici...**
+**Le protocole ssh permet d'ouvrir une session distante sécurisé (comparé à son homologue Telnet) sur un poste distant, idéal pour la configuration à distance**
 
 ---
 
@@ -643,12 +649,10 @@ ssh root@192.168.200.3 (password : celui que vous avez configuré)
   <li>En général, à quoi faut-il particulièrement faire attention lors de l'écriture des règles du pare-feu pour ce type de connexion ? 
   </li>                                  
 </ol>
-
-
 ---
 **Réponse**
 
-**LIVRABLE : Votre réponse ici...**
+**A bien paramétrer les règles afin d'être le plus spécifique possible, par exemple spécifier une seul machine comme étant autorisé à faire la connexion et également décrire les flags TCP pour la connexion afin d'éviter des usurpations d'identité **
 
 ---
 
@@ -662,6 +666,5 @@ A présent, vous devriez avoir le matériel nécessaire afin de reproduire la ta
 </ol>
 ---
 
-**LIVRABLE : capture d'écran avec toutes vos règles.**
 
----
+![](/home/splinux/Documents/git/SRX/Teaching-HEIGVD-SRX-2020-Labo-Firewall/Images/Liste_Rules.png)
