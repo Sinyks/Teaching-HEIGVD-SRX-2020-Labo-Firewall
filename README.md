@@ -366,7 +366,7 @@ Sauvegarder la configuration du firewall dans le fichier `iptables.conf` :
 iptables-save > iptables.conf
 ```
 
-Récuperer la config sauvegardée :
+Récupérer la config sauvegardée :
 
 ```bash
 iptables-restore < iptables.conf
@@ -401,9 +401,26 @@ Commandes iptables :
 
 ```bash
 LIVRABLE : Commandes iptables
+#############################################################################
+# Important toute les commande on été testé avec une stratégie ALL BLOCK	#
+#############################################################################
+
+# Autoriser les ping depuis le lan -> DMZ
+iptables -A FORWARD -s 192.168.100.0/24 -d 192.168.200.0/24 -p icmp --icmp-type 8 -j ACCEPT
+iptables -A FORWARD -s 192.168.200.0/24 -d 192.168.100.0/24 -p icmp --icmp-type 0 -j ACCEPT
+
+# Autoriser les ping depuis le lan -> WAN
+
+iptables -A FORWARD -s 192.168.100.0/24 -p icmp --icmp-type 8 -j ACCEPT
+iptables -A FORWARD -d 192.168.100.0/24 -p icmp --icmp-type 0 -j ACCEPT
+
+# Autoriser les ping depuis le DMZ -> lan
+
+iptables -A FORWARD -s 192.168.200.0/24 -d 192.168.100.0/24 -p icmp --icmp-type 8 -j ACCEPT
+iptables -A FORWARD -s 192.168.100.0/24 -d 192.168.200.0/24 -p icmp --icmp-type 0 -j ACCEPT
+
 ```
 ---
-
 ### Questions
 
 <ol type="a" start="2">
@@ -419,7 +436,12 @@ Faire une capture du ping.
 ---
 **LIVRABLE : capture d'écran de votre ping vers l'Internet.**
 
+![](./Images/Tentative_dePing_iptables.PNG)
+
 ---
+
+
+
 
 <ol type="a" start="3">
   <li>Testez ensuite toutes les règles, depuis le Client_in_LAN puis depuis le serveur Web (Server_in_DMZ) et remplir le tableau suivant : 
@@ -427,20 +449,21 @@ Faire une capture du ping.
 </ol>
 
 
-| De Client\_in\_LAN à | OK/KO | Commentaires et explications |
-| :---                 | :---: | :---                         |
-| Interface DMZ du FW  |       |                              |
-| Interface LAN du FW  |       |                              |
-| Client LAN           |       |                              |
-| Serveur WAN          |       |                              |
+
+| De Client\_in\_LAN à | OK/KO | Commentaires et explications                    |
+| :------------------- | :---: | :---------------------------------------------- |
+| Interface DMZ du FW  |  KO   | Car la stratégie dans INPUT est DROP par défaut |
+| Interface LAN du FW  |  OK   |                                                 |
+| Client LAN           |  OK   |                                                 |
+| Serveur WAN          |  OK   |                                                 |
 
 
-| De Server\_in\_DMZ à | OK/KO | Commentaires et explications |
-| :---                 | :---: | :---                         |
-| Interface DMZ du FW  |       |                              |
-| Interface LAN du FW  |       |                              |
-| Serveur DMZ          |       |                              |
-| Serveur WAN          |       |                              |
+| De Server\_in\_DMZ à | OK/KO | Commentaires et explications                                 |
+| :------------------- | :---: | :----------------------------------------------------------- |
+| Interface DMZ du FW  |  KO   | Car la stratégie dans INPUT est DROP par défaut              |
+| Interface LAN du FW  |  KO   | Car la stratégie Car la stratégie dans INPUT est DROP par défaut |
+| Serveur DMZ          |  OK   |                                                              |
+| Serveur WAN          |  KO   | Car la règle de FORWARD est limité au lan                    |
 
 
 ## Règles pour le protocole DNS
@@ -460,6 +483,8 @@ ping www.google.com
 
 **LIVRABLE : capture d'écran de votre ping.**
 
+![](./Images/Tentative_dePing_DNS.PNG)
+
 ---
 
 * Créer et appliquer la règle adéquate pour que la **condition 1 du cahier des charges** soit respectée.
@@ -470,6 +495,18 @@ Commandes iptables :
 
 ```bash
 LIVRABLE : Commandes iptables
+
+# Autoriser les requetes DNS
+
+iptables -A FORWARD -s 192.168.100.0/24 -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -d 192.168.100.0/24 -p udp --sport 53 -j ACCEPT
+
+# avec TCP
+iptables -A FORWARD -s 192.168.100.0/24 -p tcp --dport 53 -m conntrack --ctstate NEW
+iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 53 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 53 -m conntrack --ctstate INVALID -j DROP
+
 ```
 
 ---
@@ -481,6 +518,8 @@ LIVRABLE : Commandes iptables
 ---
 
 **LIVRABLE : capture d'écran de votre ping.**
+
+![](./Images/Tentative_dePing_DNS_success.PNG)
 
 ---
 
