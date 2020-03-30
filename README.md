@@ -607,7 +607,7 @@ Commandes iptables :
 ```bash
 LIVRABLE : Commandes iptables
 
-# Autoriser les packets SSH pour la clientLan->DMZ et clientLan->firewall
+# Autoriser les packets SSH pour la clientLan->ServeurDMZ et clientLan->firewall
 
 iptables -A FORWARD -s 192.168.100.3 -d 192.168.200.3 -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -s 192.168.200.3 -d 192.168.100.3 -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
@@ -641,7 +641,7 @@ ssh root@192.168.200.3 (password : celui que vous avez configuré)
 ---
 **Réponse**
 
-**Le protocole ssh permet d'ouvrir une session distante sécurisé (comparé à son homologue Telnet) sur un poste distant, idéal pour la configuration à distance**
+**Le protocole ssh permet d'ouvrir une session distante chiffrée (contrairement à son homologue Telnet) sur un poste distant, idéal pour la configuration à distance**
 
 ---
 
@@ -652,7 +652,7 @@ ssh root@192.168.200.3 (password : celui que vous avez configuré)
 ---
 **Réponse**
 
-**A bien paramétrer les règles afin d'être le plus spécifique possible, par exemple spécifier une seul machine comme étant autorisé à faire la connexion et également décrire les flags TCP pour la connexion afin d'éviter des usurpations d'identité **
+**A bien paramétrer les règles afin d'être le plus spécifique possible, par exemple spécifier une seul machine comme étant autorisé à faire la connexion ou ne permettre les connexion que depuis l'intérieur du réseau car c'est en SSH que se font les configurations du pare-feu et il ne faut pas que des gens mal intentionnés puissent modifier la configuration.**
 
 ---
 
