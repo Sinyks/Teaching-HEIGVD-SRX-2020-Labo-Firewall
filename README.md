@@ -530,7 +530,7 @@ iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 53 -m conntrack --ctstate
 ---
 **Réponse**
 
-**LIVRABLE : Votre réponse ici...**
+les paquets étant DROP au niveau du FW le client n'a pas d'erreur de résolution d'adresses
 
 ---
 
@@ -550,7 +550,21 @@ Commandes iptables :
 ---
 
 ```bash
-LIVRABLE : Commandes iptables
+# Autoriser les les paquets HTTP/S
+
+iptables -A FORWARD -s 192.168.100.0/24 -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -s 192.168.100.0/24 -p tcp --dport 8080 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+
+iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 8080 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+iptables -A FORWARD -s 192.168.100.0/24 -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 443 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 80 -m conntrack --ctstate INVALID -j DROP
+iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 8080 -m conntrack --ctstate INVALID -j DROP
+iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 443 -m conntrack --ctstate INVALID -j DROP
+
 ```
 
 ---
@@ -563,6 +577,12 @@ Commandes iptables :
 
 ```bash
 LIVRABLE : Commandes iptables
+# Autoriser les packets HTTP allant vers la DMZ
+iptables -A FORWARD -d 192.168.200.3 -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -s 192.168.100.3 -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+iptables -A FORWARD -d 192.168.100.3 -p tcp --sport 80 -m conntrack --ctstate INVALID -j DROP
+
 ```
 ---
 
@@ -573,6 +593,8 @@ LIVRABLE : Commandes iptables
 ---
 
 **LIVRABLE : capture d'écran.**
+
+![](./Images/Tentative_deWGETDMZ_success.PNG)
 
 ---
 
