@@ -123,19 +123,19 @@ _Lors de la définition d'une zone, spécifier l'adresse du sous-réseau IP avec
 **LIVRABLE : Remplir le tableau**
 
 
-| Adresse IP source | Adresse IP destination | Type  |  Port src   |   Port dst    | Action |
-| :---------------: | :--------------------: | :---: | :---------: | :-----------: | :----: |
-| 192.168.100.0/24  |          WAN           |  DNS  | TCP/UDP: 53 |  TCP/UDP: 53  | Accept |
-| 192.168.100.0/24  |          WAN           | ICMP  |      -      |       -       | Accept |
-| 192.168.100.0/24  |    192.168.200.0/24    | ICMP  |      -      |       -       | Accept |
-| 192.168.200.0/24  |    192.168.100.0/24    | ICMP  |      -      |       -       | Accept |
-| 192.168.100.0/24  |          WAN           | HTTP  |     any     | TCP : 80/8080 | Accept |
-| 192.168.100.0/24  |          WAN           | HTTPS |     any     |   TCP : 443   | Accept |
-|        WAN        |    192.168.200.3/24    | HTTP  |     any     |    TCP:80     | Accept |
-| 192.168.100.0/24  |    192.168.200.3/24    | HTTP  |     any     |   TCP : 80    | Accept |
-| 192.168.100.3/24  |    192.168.200.3/24    |  SSH  |     any     |   TCP : 22    | Accept |
-| 192.168.100.3/24  |    192.168.100.2/24    |  SSH  |     any     |   TCP : 22    | Accept |
-|      0.0.0.0      |        0.0.0.0         |  any  |     any     |      any      |  Drop  |
+| Adresse IP source | Adresse IP destination | Type  | Port src |   Port dst    | Action |
+| :---------------: | :--------------------: | :---: | :------: | :-----------: | :----: |
+| 192.168.100.0/24  |          WAN           |  DNS  |   any    |  TCP/UDP: 53  | Accept |
+| 192.168.100.0/24  |          WAN           | ICMP  |    -     |       -       | Accept |
+| 192.168.100.0/24  |    192.168.200.0/24    | ICMP  |    -     |       -       | Accept |
+| 192.168.200.0/24  |    192.168.100.0/24    | ICMP  |    -     |       -       | Accept |
+| 192.168.100.0/24  |          WAN           | HTTP  |   any    | TCP : 80/8080 | Accept |
+| 192.168.100.0/24  |          WAN           | HTTPS |   any    |   TCP : 443   | Accept |
+|        WAN        |    192.168.200.3/24    | HTTP  |   any    |    TCP:80     | Accept |
+| 192.168.100.0/24  |    192.168.200.3/24    | HTTP  |   any    |   TCP : 80    | Accept |
+| 192.168.100.3/24  |    192.168.200.3/24    |  SSH  |   any    |   TCP : 22    | Accept |
+| 192.168.100.3/24  |    192.168.100.2/24    |  SSH  |   any    |   TCP : 22    | Accept |
+|        any        |          any           |  any  |   any    |      any      |  Drop  |
 
 ---
 
@@ -402,22 +402,23 @@ Commandes iptables :
 ```bash
 LIVRABLE : Commandes iptables
 #############################################################################
-# Important toute les commande on été testé avec une stratégie ALL BLOCK	#
+# Important toute les commande on été testé avec une stratégie ALL DROP	#
 #############################################################################
 
 # Autoriser les ping depuis le lan -> DMZ
-iptables -A FORWARD -s 192.168.100.0/24 -d 192.168.200.0/24 -p icmp --icmp-type 8 -j ACCEPT
-iptables -A FORWARD -s 192.168.200.0/24 -d 192.168.100.0/24 -p icmp --icmp-type 0 -j ACCEPT
+iptables -A FORWARD -s 192.168.100.0/24 -d 192.168.200.0/24 -p icmp -m state --state NEW -j ACCEPT
+iptables -A FORWARD -s 192.168.200.0/24 -d 192.168.100.0/24 -p icmp -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Autoriser les ping depuis le lan -> WAN
 
-iptables -A FORWARD -s 192.168.100.0/24 -p icmp --icmp-type 8 -j ACCEPT
-iptables -A FORWARD -d 192.168.100.0/24 -p icmp --icmp-type 0 -j ACCEPT
+iptables -A FORWARD -s 192.168.100.0/24 -p icmp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT #Fonctionne pas si juste NEW
+iptables -A FORWARD -d 192.168.100.0/24 -p icmp -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Autoriser les ping depuis le DMZ -> lan
 
-iptables -A FORWARD -s 192.168.200.0/24 -d 192.168.100.0/24 -p icmp --icmp-type 8 -j ACCEPT
-iptables -A FORWARD -s 192.168.100.0/24 -d 192.168.200.0/24 -p icmp --icmp-type 0 -j ACCEPT
+iptables -A FORWARD -s 192.168.200.0/24 -d 192.168.100.0/24 -p icmp -m state --state NEW -j ACCEPT
+iptables -A FORWARD -s 192.168.100.0/24 -d 192.168.200.0/24 -p icmp -m state --state ESTABLISHED,RELATED -j ACCEPT
+
 
 ```
 ---
@@ -493,16 +494,13 @@ Commandes iptables :
 ```bash
 LIVRABLE : Commandes iptables
 
-# Autoriser les requetes DNS
-
+# avec UDP
 iptables -A FORWARD -s 192.168.100.0/24 -p udp --dport 53 -j ACCEPT
 iptables -A FORWARD -d 192.168.100.0/24 -p udp --sport 53 -j ACCEPT
 
 # avec TCP
-iptables -A FORWARD -s 192.168.100.0/24 -p tcp --dport 53 -m conntrack --ctstate NEW
+iptables -A FORWARD -s 192.168.100.0/24 -p tcp --dport 53 -m conntrack --ctstate NEW -j ACCEPT
 iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 53 -m conntrack --ctstate ESTABLISHED -j ACCEPT
-
-iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 53 -m conntrack --ctstate INVALID -j DROP
 
 ```
 
@@ -557,10 +555,6 @@ iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 8080 -m conntrack --ctsta
 iptables -A FORWARD -s 192.168.100.0/24 -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 443 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 80 -m conntrack --ctstate INVALID -j DROP
-iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 8080 -m conntrack --ctstate INVALID -j DROP
-iptables -A FORWARD -d 192.168.100.0/24 -p tcp --sport 443 -m conntrack --ctstate INVALID -j DROP
-
 ```
 
 ---
@@ -574,10 +568,9 @@ Commandes iptables :
 ```bash
 LIVRABLE : Commandes iptables
 # Autoriser les packets HTTP allant vers la DMZ
+
 iptables -A FORWARD -d 192.168.200.3 -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -s 192.168.100.3 -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-
-iptables -A FORWARD -d 192.168.100.3 -p tcp --sport 80 -m conntrack --ctstate INVALID -j DROP
 
 ```
 ---
@@ -607,16 +600,13 @@ Commandes iptables :
 ```bash
 LIVRABLE : Commandes iptables
 
-# Autoriser les packets SSH pour la clientLan->ServeurDMZ et clientLan->firewall
+# Autoriser les packets SSH pour la clientLan->DMZ et clientLan->firewall
 
 iptables -A FORWARD -s 192.168.100.3 -d 192.168.200.3 -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -s 192.168.200.3 -d 192.168.100.3 -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
 iptables -A INPUT -s 192.168.100.3 -d 192.168.100.2 -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 iptables -A OUTPUT -s 192.168.100.2 -d 192.168.100.3 -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-
-iptables -A FORWARD -d 192.168.100.3 -p tcp --sport 22 -m conntrack --ctstate INVALID -j DROP
-iptables -A INPUT -d 192.168.100.2 -p tcp --sport 22 -m conntrack --ctstate INVALID -j DROP
 
 ```
 
